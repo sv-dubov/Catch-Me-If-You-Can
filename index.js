@@ -4,6 +4,7 @@ var $time = document.querySelector('#time');
 var $result = document.querySelector('#result');
 var $timeHeader = document.querySelector('#time-header');
 var $resultHeader = document.querySelector('#result-header');
+var $recordHeader = document.querySelector('#record-header');
 var $gameTime = document.querySelector('#game-time');
 
 var colors = ['green', 'red', 'yellow', 'black', 'blue', 'pink', 'brown', 'violet'];
@@ -13,6 +14,25 @@ var isGameStarted = false;
 $start.addEventListener('click', startGame);
 $game.addEventListener('click', handleBoxClick);
 $gameTime.addEventListener('input', setGameTime);
+
+function saveResult() {
+    var value = document.getElementById('result').innerText;
+    var res = {
+        text: value
+    };
+    localStorage.setItem('gameResult', JSON.stringify(res));
+}
+
+function getResult() {
+    //var res = {}; // undefined
+    try {
+        res = JSON.parse(localStorage.getItem('gameResult'));
+    } catch (e) { }
+    // undefined . text
+    if (res && res.text && res.text.trim()) {
+        return res.text;
+    }
+}
 
 function show($el) {
     $el.classList.remove('hide');
@@ -29,6 +49,7 @@ function startGame() {
     isGameStarted = true;
     $game.style.backgroundColor = '#fff';
     hide($start);
+    document.querySelector('#record').textContent = getResult();
 
     var interval = setInterval(function () {
         var time = parseFloat($time.textContent);
@@ -44,6 +65,13 @@ function startGame() {
 
 function setGameScore() {
     $result.textContent = score.toString();
+    var value = document.getElementById('result').innerText;
+    var record = parseInt(getResult());
+    if (value > record) {
+        saveResult();
+    } else if (!record) {
+        saveResult();
+    }
 }
 
 function setGameTime() {
@@ -51,6 +79,7 @@ function setGameTime() {
     $time.textContent = time.toFixed(1);
     show($timeHeader);
     hide($resultHeader);
+    hide($recordHeader);
 }
 
 function endGame() {
@@ -62,6 +91,8 @@ function endGame() {
     $game.style.backgroundColor = '#ccc';
     hide($timeHeader);
     show($resultHeader);
+    show($recordHeader);
+    getResult();
 }
 
 function handleBoxClick(event) {
